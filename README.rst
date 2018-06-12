@@ -51,7 +51,9 @@ The following is a sample usage of :code:`profile_bins` of the simplest form:
                 --reads=read1.bed,read2.bed \
                 --labs=s1,s2 -n example
 
-.. Note:: :code:`profile_bins` only recognizes BED-formatted_ input files. For read
+.. Note::
+
+   :code:`profile_bins` only recognizes BED-formatted_ input files. For read
    alignment results stored in SAM_ files, use first :code:`sam2bed` to
    transform them into BED files before calling :code:`profile_bins` (BED files
    created by :code:`sam2bed` have been specifically designed to suit
@@ -164,10 +166,11 @@ Among others, several parameters deserve specific attention:
   Note that :code:`--parameters` could be used in mixture with the other
   command-line arguments.
 
-Refer to the `home page of MAnorm2_utils`_ for a full specification of the
+Refer to the `Manual of MAnorm2_utils`_ for a full specification of the
 parameters supported by :code:`profile_bins`.
 
-.. _home page of MAnorm2_utils: https://github.com/tushiqi/MAnorm2_utils
+.. _Manual of MAnorm2_utils: https://github.com/tushiqi/MAnorm2_utils/
+                             tree/master/docs
 
 
 Transforming SAM into BED files
