@@ -65,7 +65,7 @@ The following is a sample usage of :code:`profile_bins` of the simplest form:
 .. _BAM-formatted: SAM_
 .. _SAM: http://samtools.github.io/hts-specs/SAMv1.pdf
 .. _Samtools: http://www.htslib.org/
-__ Transforming SAM into BED files_
+__ `Transforming SAM into BED files`_
 
 If everything goes smoothly, the command above will generate two files, named
 ``example_profile_bins_log.txt`` and ``example_profile_bins.xls``,
