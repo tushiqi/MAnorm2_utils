@@ -2,14 +2,18 @@
 MAnorm2_utils 1.0.0
 ==============================
 
-.. _MAnorm2: https://github.com/tushiqi/MAnorm2
-.. _ChIP-seq: https://en.wikipedia.org/wiki/ChIP-sequencing
+:Author: Shiqi Tu
+:Contact: tushiqi@picb.ac.cn
+:Date: 2018-07-02
 
 :code:`MAnorm2_utils` is designed to coordinate with MAnorm2_, an R package for
 differential analysis with ChIP-seq_ signals between two or more groups of
 replicate samples. :code:`MAnorm2_utils` is primarily used for processing a set
 of ChIP-seq samples into a regular table recording the read abundances and
 enrichment states of a list of genomic bins in each of these samples.
+
+.. _MAnorm2: https://github.com/tushiqi/MAnorm2
+.. _ChIP-seq: https://en.wikipedia.org/wiki/ChIP-sequencing
 
 
 Usage
@@ -90,10 +94,10 @@ has a format like the following (data shown here is only for illustration):
 To clarify, a genomic bin is "occupied" by a ChIP-seq sample if and only if its
 middle point is covered by some peak region of the sample.
 
-:code:`profile_bins` provides a number of parameters for a customized
+:code:`profile_bins` supports a number of parameters for a customized
 configuration for deducing reference genomic bins as well as counting the reads
 falling in them. Type :code:`profile_bins --help` in the command line for a
-complete list of these parameters and a brife description of each of them.
+complete list of these parameters and a brief description of each of them.
 Among others, several parameters deserve specific attention:
 
 - By default, :code:`profile_bins` merges peaks from all the provided ChIP-seq
@@ -130,8 +134,9 @@ Among others, several parameters deserve specific attention:
 
 - Set :code:`--paired` to indicate the reads are paired-end. In this case,
   middle point of the underlying DNA fragment associated with each read pair
-  could be accurately inferred. Note that :code:`profile_bins` uses the *name*
-  field (i.e., the 4th column in a BED_ file) to pair reads.
+  could be accurately inferred. Note that two reads from the same ChIP-seq
+  sample are considered as a read pair only if they have *exactly the same*
+  name (i.e., the 4th column in a BED_ file).
   
   :code:`--shiftsize` is ignored when :code:`--paired` is set.
 
@@ -143,7 +148,7 @@ Among others, several parameters deserve specific attention:
   interval.
   
   By default, :code:`profile_bins` preserves all the reads (or read pairs) for
-  the counting procedure. For both paired-end reads and deep-sequenced
+  the counting procedure. For both paired-end reads and deep-sequencing
   single-end reads, we strongly recommend setting :code:`--keep-dup` to 1 to
   enhance the specificity of downstream analyses. In that case, for each
   ChIP-seq sample only one read (or read pair) of a set of duplicates is
@@ -187,11 +192,12 @@ latter only accepts BED-formatted_ files. The simplest form of calling
 The program will read from the standard input stream if :code:`-i` is not
 specified.
 
-In most cases, the default setting of most of the parameters supported by
-:code:`sam2bed` should be used. The only parameter that may be customized in
-practice is the :code:`--min-qual`, which controls the program's behavior
+In the vast majority of cases, the default setting of most of the parameters
+supported by :code:`sam2bed` should be used.
+The only parameter that may be customized in
+practice is :code:`--min-qual`, which controls the program's behavior
 regarding filtering out the SAM_ alignment records with a low mapping quality.
-Type :code:`sam2bed --help` in the command line for a brife description of each
+Type :code:`sam2bed --help` in the command line for a brief description of each
 parameter supported by :code:`sam2bed`.
 
 
