@@ -4,7 +4,7 @@ MAnorm2_utils 1.0.0
 
 :Author: Shiqi Tu
 :Contact: tushiqi@picb.ac.cn
-:Date: 2018-07-02
+:Date: 2018-07-08
 
 :code:`MAnorm2_utils` is designed to coordinate with MAnorm2_, an R package for
 differential analysis with ChIP-seq_ signals between two or more groups of
@@ -80,15 +80,15 @@ enrichment status for each deduced reference genomic bin in each sample, and
 has a format like the following (data shown here is only for illustration):
 
 .. table:: Example output of :code:`profile_bins`
-   :align: left
+   :align: right
    
    ======  =======  =======  ============  ============  =============  =============
-   chrom   start    end      s1.read_cnt   s2.read_cnt   s1.occupancy   s2.occupancy
+    chrom    start      end   s1.read_cnt   s2.read_cnt   s1.occupancy   s2.occupancy
    ======  =======  =======  ============  ============  =============  =============
-   chr1    28112    29788    115           4             1              0
-   chr1    164156   166417   233           194           1              1
-   chr1    166417   168417   465           577           1              1
-   chr1    168417   169906   15            34            0              1
+     chr1    28112    29788           115             4              1              0
+     chr1   164156   166417           233           194              1              1
+     chr1   166417   168417           465           577              1              1
+     chr1   168417   169906            15            34              0              1
    ======  =======  =======  ============  ============  =============  =============
 
 To clarify, a genomic bin is "occupied" by a ChIP-seq sample if and only if its
