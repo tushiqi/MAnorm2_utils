@@ -81,7 +81,7 @@ has a format like the following (data shown here is only for illustration):
 
 .. table:: Example output of :code:`profile_bins`
    :align: right
-   
+
    ======  =======  =======  ============  ============  =============  =============
     chrom    start      end   s1.read_cnt   s2.read_cnt   s1.occupancy   s2.occupancy
    ======  =======  =======  ============  ============  =============  =============
