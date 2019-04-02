@@ -1,0 +1,785 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Specification of MAnorm2_utils &#8212; MAnorm2_utils 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">MAnorm2_utils 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="specification-of-manorm2-utils">
+<h1>Specification of MAnorm2_utils<a class="headerlink" href="#specification-of-manorm2-utils" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">Shiqi Tu</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Contact:</th><td class="field-body"><a class="reference external" href="mailto:tushiqi&#37;&#52;&#48;picb&#46;ac&#46;cn">tushiqi<span>&#64;</span>picb<span>&#46;</span>ac<span>&#46;</span>cn</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">1.0.0</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">2018-08-24</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Abstract:</th><td class="field-body"><code class="code docutils literal notranslate"><span class="pre">MAnorm2_utils</span></code> is designed to coordinate with <a class="reference external" href="https://github.com/tushiqi/MAnorm2"><code class="code docutils literal notranslate"><span class="pre">MAnorm2</span></code></a>, an R
+package for differential analysis with <a class="reference external" href="https://en.wikipedia.org/wiki/ChIP-sequencing">ChIP-seq</a> signals between two or more
+groups of replicate samples. <code class="code docutils literal notranslate"><span class="pre">MAnorm2_utils</span></code> is primarily used for
+processing a set of ChIP-seq samples into a regular table recording the read
+abundances and enrichment states of a list of genomic bins in each of these
+samples.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This document is a fully detailed specification. For a quick experience with
+<code class="code docutils literal notranslate"><span class="pre">MAnorm2_utils</span></code>, refer to its <a class="reference external" href="https://github.com/tushiqi/MAnorm2_utils">home page</a>.</p>
+</div>
+<p>The primary utility of <code class="code docutils literal notranslate"><span class="pre">MAnorm2_utils</span></code> comes from the two scripts bound
+with it, named <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> and <code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code>, respectively. This
+document focuses on detailing the usage of them.</p>
+<div class="contents local topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#profiling-chip-seq-signals-in-reference-genomic-regions" id="id1">Profiling ChIP-seq signals in reference genomic regions</a><ul>
+<li><a class="reference internal" href="#mandatory-inputs" id="id2">Mandatory inputs</a></li>
+<li><a class="reference internal" href="#decorating-outputs" id="id3">Decorating outputs</a></li>
+<li><a class="reference internal" href="#deducing-reference-genomic-bins" id="id4">Deducing reference genomic bins</a></li>
+<li><a class="reference internal" href="#counting-reads-falling-within-reference-genomic-bins" id="id5">Counting reads falling within reference genomic bins</a></li>
+<li><a class="reference internal" href="#miscellaneous" id="id6">Miscellaneous</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transforming-sam-into-bed-files" id="id7">Transforming SAM into BED files</a></li>
+</ul>
+</div>
+<div class="section" id="profiling-chip-seq-signals-in-reference-genomic-regions">
+<h2><a class="toc-backref" href="#id1">Profiling ChIP-seq signals in reference genomic regions</a><a class="headerlink" href="#profiling-chip-seq-signals-in-reference-genomic-regions" title="Permalink to this headline">¶</a></h2>
+<p>Typically, a considerable proportion of the mapped reads of a ChIP-seq sample
+are dispersed throughout the genome, while the others cluster together
+constituting reads-enriched genomic regions, termed peaks. Peak regions of a
+ChIP-seq sample generally represent putative transcription-factor binding sites
+or enrichments for a certain histone modification. Refer to <a class="reference external" href="https://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137">MACS</a> for more
+information about the characteristics of ChIP-seq peaks.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> uses pre-defined peaks of a set of ChIP-seq samples to
+come up with a list of reference genomic bins (each being enriched for ChIP-seq
+signals in at least one of the samples). The program also deduces the read
+abundance as well as enrichment status of each of the reference bins in each
+sample.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We recommend <a class="reference external" href="https://github.com/taoliu/MACS/downloads">MACS 1.4</a> for identifying peaks for ChIP-seq samples
+associated with narrow genomic regions of reads enrichment (e.g., samples
+for most transcription factors and histone modifications like H3K4me3 and
+H3K27ac). In fact, although having a general applicability,
+<code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> is specifically suited to processing the output files
+generated by MACS 1.4. For histone modifications constituting broad enriched
+domains (e.g., H3K9me3 and H3K27me3), we recommend <a class="reference external" href="https://academic.oup.com/bioinformatics/article/25/15/1952/212783">SICER</a> as the peak
+caller. See <a class="reference external" href="https://link.springer.com/article/10.1007/s40484-017-0111-8">here</a> for more methods for calling peaks on ChIP-seq data.</p>
+</div>
+<p>The following is a sample usage of <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> of the simplest form:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>profile_bins --peaks<span class="o">=</span>peak1.bed,peak2.bed <span class="se">\</span>
+             --reads<span class="o">=</span>read1.bed,read2.bed <span class="se">\</span>
+             --labs<span class="o">=</span>s1,s2 -n example
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> only recognizes <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED-formatted</a> input files. For read
+alignment results stored in <a class="reference external" href="https://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> files, use first <code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code> to
+transform them into BED files before calling <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> (BED files
+created by <code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code> have been specifically designed to suit
+<code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>; see also <a class="reference internal" href="#transforming-sam-into-bed-files">Transforming SAM into BED files</a> below).
+For <a class="reference external" href="https://samtools.github.io/hts-specs/SAMv1.pdf">BAM-formatted</a> files, refer to <a class="reference external" href="https://www.htslib.org/">Samtools</a> for converting them into SAM
+files.</p>
+</div>
+<p>If everything goes smoothly, the command above will generate two files, named
+<code class="docutils literal notranslate"><span class="pre">example_profile_bins_log.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">example_profile_bins.xls</span></code>,
+respectively. The former records the full list of parameter settings for
+calling <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>, as well as some summary statistics regarding each
+of the supplied ChIP-seq samples. The latter gives the read count and
+enrichment status for each deduced reference genomic bin in each sample, and
+has a format like the following (data shown here is only for illustration):</p>
+<table border="1" class="docutils align-right" id="example-output">
+<caption><span class="caption-text">Example output of <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code></span><a class="headerlink" href="#example-output" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="9%" />
+<col width="10%" />
+<col width="10%" />
+<col width="17%" />
+<col width="17%" />
+<col width="19%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">chrom</th>
+<th class="head">start</th>
+<th class="head">end</th>
+<th class="head">s1.read_cnt</th>
+<th class="head">s2.read_cnt</th>
+<th class="head">s1.occupancy</th>
+<th class="head">s2.occupancy</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>chr1</td>
+<td>28112</td>
+<td>29788</td>
+<td>115</td>
+<td>4</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td>chr1</td>
+<td>164156</td>
+<td>166417</td>
+<td>233</td>
+<td>194</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td>chr1</td>
+<td>166417</td>
+<td>168417</td>
+<td>465</td>
+<td>577</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>chr1</td>
+<td>168417</td>
+<td>169906</td>
+<td>15</td>
+<td>34</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>To clarify, a genomic bin is “occupied” by a ChIP-seq sample if and only if its
+middle point is covered by some peak region of the sample.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> supports a number of parameters for a customized
+configuration for deducing reference genomic bins as well as counting the reads
+falling in them. Type <code class="code docutils literal notranslate"><span class="pre">profile_bins</span> <span class="pre">--help</span></code> in the command line for a
+complete list of these parameters and a brief description of each of them.</p>
+<p>The following subsections classify all the parameters supported by
+<code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> into different functions, and provide a detailed
+explanation for each of them.</p>
+<div class="section" id="mandatory-inputs">
+<h3><a class="toc-backref" href="#id2">Mandatory inputs</a><a class="headerlink" href="#mandatory-inputs" title="Permalink to this headline">¶</a></h3>
+<p>Read alignment results and peak regions of each of a set of ChIP-seq samples
+are required for calling <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>:</p>
+<table border="1" class="docutils align-left">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--peaks=&lt;files&gt;</span></code></td>
+<td><p class="first" id="peaks"><a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> files recording peak regions of each ChIP-seq
+sample. File names should be separated by a comma (a
+trailing comma is allowed).</p>
+<p class="last">The first 3 columns of
+each BED file are mandatory. The <em>score</em> field (i.e.,
+the 5th column of a BED file) may be optionally used
+to filter peaks (see <a class="reference internal" href="#keep-peaks"><code class="code docutils literal notranslate"><span class="pre">--keep-peaks</span></code></a> below).</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--reads=&lt;files&gt;</span></code></td>
+<td><p class="first"><a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> files recording read alignments for each ChIP-seq
+sample. File names should be separated by a comma (a
+trailing comma is allowed).</p>
+<p class="last">The first 3 columns of
+each BED file are mandatory. For single-end reads,
+the <em>strand</em> field (i.e., the 6th column of a BED
+file) is used for shifting downstream the 5’ end of
+each read, and is assumed to be “+” when the field is
+not available (see <a class="reference internal" href="#shiftsize"><code class="code docutils literal notranslate"><span class="pre">--shiftsize</span></code></a> below). For
+paired-end reads, both the <em>name</em> and <em>strand</em> fields
+are required (the 4th and 6th columns of a BED file,
+respectively; see <a class="reference internal" href="#paired"><code class="code docutils literal notranslate"><span class="pre">--paired</span></code></a> below).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="decorating-outputs">
+<h3><a class="toc-backref" href="#id3">Decorating outputs</a><a class="headerlink" href="#decorating-outputs" title="Permalink to this headline">¶</a></h3>
+<p>Each call of <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> generates two files, named
+<em>prefix</em>_profile_bins_log.txt and <em>prefix</em>_profile_bins.xls, respectively.
+You may specify the common <em>prefix</em> of the two file names and the labels of
+ChIP-seq samples for creating the header of the latter file:</p>
+<table border="1" class="docutils align-left">
+<colgroup>
+<col width="25%" />
+<col width="75%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">-n</span> <span class="pre">&lt;string&gt;</span></code></td>
+<td><p class="first">Common prefix of the names of output files.</p>
+<p class="last">Default: NA</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--labs=&lt;strings&gt;</span></code></td>
+<td><p class="first">Labels of the supplied ChIP-seq samples, separated by a
+comma (a trailing comma is allowed) and used only for
+writing the header of an output file.</p>
+<p class="last">Default: s1,s2,…</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="deducing-reference-genomic-bins">
+<h3><a class="toc-backref" href="#id4">Deducing reference genomic bins</a><a class="headerlink" href="#deducing-reference-genomic-bins" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> comes up with a set of reference genomic bins by merging
+the peak regions from all the provided ChIP-seq samples and dividing up each
+<em>broad</em> merged peak into consecutive, non-overlapping genomic bins. Several
+parameters have been designed for customizing this procedure:</p>
+<table border="1" class="docutils align-left">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--keep-peaks=&lt;int&gt;</span></code></td>
+<td><p class="first" id="keep-peaks">The maximum number of peaks to keep for each
+ChIP-seq sample. If set, peaks in each peak file
+are sorted by their <em>score</em> fields (i.e., the
+5th column of a <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> file). These fields are
+considered as numeric values, and for each
+ChIP-seq sample only the &lt;int&gt; peaks with the
+<em>greatest</em> scores are retained for the
+subsequent usage. By default, all peaks are
+used.</p>
+<p class="last">Note that this parameter is specifically useful
+for processing the BED-formatted peak files
+generated by <a class="reference external" href="https://github.com/taoliu/MACS/downloads">MACS 1.4</a>, where the score field
+of each peak represents its statistical
+significance and is appropriate for ranking
+peaks.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--min-peak-gap=&lt;int&gt;</span></code></td>
+<td><p class="first">After filtering peak regions (if <a class="reference internal" href="#keep-peaks"><code class="code docutils literal notranslate"><span class="pre">--keep-peaks</span></code></a>
+is set), peaks of each ChIP-seq sample that are
+within a distance of &lt;int&gt; base pairs to one
+another are merged. If <a class="reference internal" href="#bins"><code class="code docutils literal notranslate"><span class="pre">--bins</span></code></a> is not set, the
+merged peaks of each sample will be further
+merged across samples (where the parameter is
+used again) to come up with a set of reference
+genomic bins. The merged peaks of each sample
+are also used to determine the enrichment status
+of each reference bin in the sample (see
+<a class="reference internal" href="#below-1">below</a>).</p>
+<p class="last">This parameter defaults to 150, which is
+approximately the length of DNA wrapping a
+single nucleosome and, thus, is suited to
+the ChIP-seq experiments targeting histone
+modifications.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--summits=&lt;files&gt;</span></code></td>
+<td><p class="first" id="summits"><a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> files recording the summit coordinate of
+each peak of each ChIP-seq sample. Only the
+first 3 columns of each BED file are used. File
+names should be separated by a comma (a trailing
+comma is allowed) and match the order of peak
+files as specified by <a class="reference internal" href="#peaks"><code class="code docutils literal notranslate"><span class="pre">--peaks</span></code></a>. For each pair
+of peak and summit files, they may be
+corresponded line by line (refer to the outputs
+of <a class="reference external" href="https://github.com/taoliu/MACS/downloads">MACS 1.4</a> for a concrete example). By
+default, the middle point of each peak is taken
+as its summit.</p>
+<p class="last">After merging peak regions from all the supplied
+ChIP-seq samples, <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> infers
+the summit position of each merged peak by using
+the summits of individual peaks constituting the
+merged one (see <a class="reference internal" href="#figure-1">Figure 1</a> for a diagram about
+deducing the summit of a merged peak). These
+inferred summits will be used as the entry
+points for dividing up “broad” merged peaks into
+consecutive genomic bins.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--typical-bin-size=&lt;int&gt;</span></code></td>
+<td><p class="first" id="typical-bin-size">Each merged peak having a size “comparable” to
+&lt;int&gt; are directly taken as reference bins. Each
+of the others is divided up into consecutive,
+non-overlapping genomic bins of &lt;int&gt; base pairs
+(except the bins at the edge of merged peaks;
+see <a class="reference internal" href="#figure-2">Figure 2</a> for a diagram about dividing up
+merged peaks).</p>
+<p class="last">This parameter defaults to 2000, which suits
+well the ChIP-seq samples of histone
+modifications. For ChIP-seq samples of
+transcription factors, setting the parameter to
+1000 is recommended.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--bins=&lt;file&gt;</span></code></td>
+<td><p class="first" id="bins">An optional <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> file specifying directly the
+set of reference genomic bins. Only the first 3
+columns of the file are used. For technical
+reasons, each bin mustn’t be completely enclosed
+by another. Note that the process of merging
+peaks across samples is repressed once <code class="code docutils literal notranslate"><span class="pre">--bins</span></code> is
+specified.</p>
+<p class="last">Formally, <a class="reference internal" href="#summits"><code class="code docutils literal notranslate"><span class="pre">--summits</span></code></a>, <a class="reference internal" href="#typical-bin-size"><code class="code docutils literal notranslate"><span class="pre">--typical-bin-size</span></code></a> and
+<a class="reference internal" href="#fix-bin-size"><code class="code docutils literal notranslate"><span class="pre">--fix-bin-size</span></code></a> are ignored if <code class="code docutils literal notranslate"><span class="pre">--bins</span></code> is
+specified.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="figure align-left" id="figure-1">
+<img alt="Deducing the summit of a merged peak" src="_images/deduce_summits.png" />
+<div class="legend">
+<p><strong>Figure 1. Deducing the summit of a merged peak.</strong> Boxes represent original
+peak regions from different ChIP-seq samples and the resulting merged
+peak. Ticks within boxes mark summits of the original peaks as well as the
+inferred summit of the merged peak.</p>
+<p>For each merged peak,
+the algorithm takes summits of the involved original peaks, and selects
+one of them as the <em>anchor point</em>. Then, for each ChIP-seq sample involved,
+it identifies the summit that is closest to the anchor. Finally, the
+<em>median</em> one of these identified summits is considered as the summit of the
+merged peak. There are two scenarios for deriving the anchor point:</p>
+<ol class="loweralpha simple">
+<li>There exist ChIP-seq samples that contribute only one peak to the merged
+peak. In this case, the algorithm takes the summits
+<em>that come from those samples</em> (e.g., sample 2 and 3 in the diagram),
+and selects the median one as the anchor point.</li>
+<li>Each ChIP-seq sample involved contributes at least two peaks to the
+merged peak. In this case, the algorithm takes summits of <em>all</em> the
+involved peaks, and selects the median one as the anchor point.</li>
+</ol>
+</div>
+</div>
+<div class="figure align-left" id="figure-2">
+<img alt="Default mode for dividing up merged peaks into consecutive genomic bins" src="_images/divide_peaks_default.png" />
+<div class="legend">
+<p><strong>Figure 2. Default mode for dividing up merged peaks into consecutive
+genomic bins.</strong> Boxes represent a merged peak and the associated genomic
+bins. Ticks within boxes mark the <em>inferred</em> summit (see <a class="reference internal" href="#figure-1">Figure 1</a>) of
+the merged peak as well as centers of bins.</p>
+<p>For each merged peak,
+the algorithm divides it up into consecutive genomic bins by first placing
+the bin whose center aligns with the inferred summit of the merged peak.
+It then extends a sequence of equal-sized, non-overlapping
+genomic bins towards both directions until the whole merged peak is covered.
+An edge bin is retained and trimmed to the corresponding edge of the merged
+peak if its center is covered by the merged peak (see the left edge bin);
+an edge bin is trimmed and absorbed into its predecessor otherwise (see the
+right one). See also <a class="reference internal" href="#fix-bin-size"><code class="code docutils literal notranslate"><span class="pre">--fix-bin-size</span></code></a> for an alternative mode for
+processing edge bins.</p>
+</div>
+</div>
+<p id="below-1">After determining reference genomic bins, <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> assigns an
+“occupancy” indicator to each of the bins in each sample (see also the table of
+<a class="reference internal" href="#example-output">Example output</a> shown above), to assess whether the bin is enriched for
+ChIP-seq signals in the sample. Formally put it,
+a reference bin has an occupancy indicator of 1 in a certain ChIP-seq sample
+if and only if the bin’s middle point falls within some peak region belonging
+to the sample.</p>
+<p>Note also that these occupancy indicators are essential to the normalization
+algorithm implemented in <a class="reference external" href="https://github.com/tushiqi/MAnorm2"><code class="code docutils literal notranslate"><span class="pre">MAnorm2</span></code></a>.</p>
+</div>
+<div class="section" id="counting-reads-falling-within-reference-genomic-bins">
+<h3><a class="toc-backref" href="#id5">Counting reads falling within reference genomic bins</a><a class="headerlink" href="#counting-reads-falling-within-reference-genomic-bins" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> next counts, for each ChIP-seq sample, the reads that fall
+within each reference genomic bin. It handles both single-end and paired-end
+reads, and has made specific efforts to take the full advantage of paired-end
+samples. Note that each read (or read pair), before being assigned to reference
+genomic bins, is converted into a genomic locus representing the imputed middle
+point of the underlying DNA fragment associated with the read (or read pair).
+Thus, each read (or read pair) would not be assigned simultaneously to two
+non-overlapping reference bins.</p>
+<p>There are several parameters designed for this procedure:</p>
+<table border="1" class="docutils align-left">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--shiftsize=&lt;int&gt;</span></code></td>
+<td><p class="first" id="shiftsize">By default, reads are treated as single-end, and
+the 5’ end of each of them will be shifted &lt;int&gt;
+base pairs downstream to reach the putative center
+of the underlying DNA fragment. Note that the
+strand of each read is assumed to be “+” when the
+corresponding field (i.e., the 6th column of a <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a>
+file) is not available.</p>
+<p class="last">This parameter defaults to 100, and may be set to
+half of the practical DNA fragment size selected in
+the library preparation process.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--paired</span></code></td>
+<td><p class="first" id="paired">If set, reads are considered as paired-end. In this
+case, middle point of the underlying DNA fragment
+associated with each read pair could be accurately
+inferred. Note that two reads from the same
+ChIP-seq sample are considered as a read pair only
+if they have <em>exactly the same</em> name (i.e., the 4th
+column of a <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> file; see also the
+<a class="reference internal" href="#note-below-1">Note below</a>). Besides, a read pair is
+valid only if the two reads are mapped to the
+different strands of the same chromatin. Unpaired
+reads and invalid read pairs, if any, will be
+ignored with a warning message.</p>
+<p class="last"><a class="reference internal" href="#shiftsize"><code class="code docutils literal notranslate"><span class="pre">--shiftsize</span></code></a> is ignored when <code class="code docutils literal notranslate"><span class="pre">--paired</span></code> is set.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--keep-dup=all/&lt;int&gt;</span></code></td>
+<td><p class="first" id="keep-dup">This parameter controls the program’s behavior
+regarding duplicate reads (or read pairs)
+potentially resulting from PCR amplification. For
+single-end reads, two reads are considered as
+duplicates if their 5’ ends are mapped to the same
+genomic locus; for paired-end reads, two read pairs
+are considered as duplicates if their implied DNA
+fragments occupy the same genomic interval.</p>
+<p class="last">By default (i.e., <code class="code docutils literal notranslate"><span class="pre">--keep-dup=all</span></code>), all reads (or
+read pairs) are preserved for counting; if
+<code class="code docutils literal notranslate"><span class="pre">--keep-dup</span></code> is set to an integer, at most &lt;int&gt;
+reads (or read pairs) of a set of duplicates from
+the same sample are retained for counting. Note
+that the output log file records, for each sample,
+the ratio of reads (or read pairs) that are removed
+due to <code class="code docutils literal notranslate"><span class="pre">--keep-dup</span></code>.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--method=byBin/byRead</span></code></td>
+<td><p class="first">The algorithm to be used for counting reads. Must
+be either “byBin” or “byRead”. In rare cases can
+using “byRead” be faster than using “byBin”.</p>
+<p class="last">Default: byBin</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note" id="note-below-1">
+<p class="first admonition-title">Note</p>
+<p><code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> identifies read pairs from a <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> file by pairing the
+read names (i.e., the 4th column of the BED file). Formally, two reads are
+treated as a pair if and only if they have <em>exactly the same</em> name. This
+manner of pairing reads, however, may conflict with some well-known routines
+for generating BED files from files of other formats. For example, the
+<a class="reference external" href="https://bedtools.readthedocs.io/en/latest/content/tools/bamtobed.html"><code class="code docutils literal notranslate"><span class="pre">bamtobed</span></code></a> utility provided by the <a class="reference external" href="https://bedtools.readthedocs.io/en/latest/">Bedtools</a> suite could convert sequence
+alignments in <a class="reference external" href="https://samtools.github.io/hts-specs/SAMv1.pdf">BAM</a> format into BED records. However, if <code class="code docutils literal notranslate"><span class="pre">bamtobed</span></code> is used
+to transform paired-end alignments, name field of each of the resulting BED
+records will be the corresponding query template name (i.e., the 1st
+mandatory field of the corresponding BAM record) with a <em>suffix</em> of /1 or /2
+appended. Roughly speaking, these suffixes are used to indicate whether each
+read is the 1st or 2nd mate of the read pair it belongs to, and they don’t
+agree with the rule of recognizing read pairs implemented in
+<code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>.</p>
+<p>On this account, the recommended strategy for converting BAM into BED files
+is to utilize the <a class="reference external" href="https://www.htslib.org/">Samtools</a> in collaboration with our <code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code> script
+(see also <a class="reference internal" href="#transforming-sam-into-bed-files">Transforming SAM into BED files</a> below). For example, you may
+exploit the following command to achieve the task:</p>
+<div class="last highlight-bash notranslate"><div class="highlight"><pre><span></span>samtools view sample.bam <span class="p">|</span> sam2bed -o sample.bed
+</pre></div>
+</div>
+</div>
+<p>Duplicate reads (or read pairs) could strongly bias the testing results of the
+following differential analysis. Therefore, for both paired-end reads and
+deep-sequencing single-end reads (e.g., &gt;25 million), we strongly recommend
+removing potential duplicates by setting the <a class="reference internal" href="#keep-dup"><code class="code docutils literal notranslate"><span class="pre">--keep-dup</span></code></a> to 1, which could
+significantly enhance the specificity of various downstream analyses. We also
+suggest applying the paired-end sequencing technology to the practical design
+of ChIP-seq experiments, which, compared with single-end sequencing,
+dramatically improves the accuracy of identifying real PCR duplicates rather
+than those reads (or read pairs) that are mapped to the same genomic location
+by chance.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">The mechanism by which <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> recognizes duplicates is highly
+dependent on the mapping positions of 5’ ends of reads. In practice,
+however, 5’ ends of reads are often trimmed in the pre-processing stage for,
+e.g., removing low-sequencing-quality bases from the alignments with the
+reference genome. On this account, we strongly emphasize that the length of
+bases trimmed from 5’ ends must remain <em>constant</em> for all reads from the
+same sample, presuming that you want to exploit the duplicates recognition
+mechanism implemented in <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>.</p>
+</div>
+</div>
+<div class="section" id="miscellaneous">
+<h3><a class="toc-backref" href="#id6">Miscellaneous</a><a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h3>
+<p>Several other parameters have been devised to add to the functionality of
+<code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> as well as to make it more accessible to users:</p>
+<table border="1" class="docutils align-left">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--fix-bin-size</span></code></td>
+<td><p class="first" id="fix-bin-size">If set, an alternative mode for dividing up merged
+peaks into reference genomic bins will be utilized,
+and all the resulting reference bins will be of the
+same size (i.e., the <a class="reference internal" href="#typical-bin-size"><code class="code docutils literal notranslate"><span class="pre">--typical-bin-size</span></code></a>). Note
+that reference bins may overlap with each other in
+this mode (see <a class="reference internal" href="#figure-3">Figure 3</a> for a detailed
+illustration of this alternative mode).</p>
+<p class="last">This parameter is ignored when <a class="reference internal" href="#bins"><code class="code docutils literal notranslate"><span class="pre">--bins</span></code></a> is
+specified.</p>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">--filter=&lt;file&gt;</span></code></td>
+<td><p class="first">An optional <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> file specifying a list of genomic
+regions to be filtered out from the following
+analyses. Only the first 3 columns of the file are
+used. Any reference bin that overlaps with some
+genomic region belonging to the list is suppressed
+from the output table. Note that filtering is
+performed at the last stage of the program, and
+summary statistics written to the output log file
+(e.g., for each ChIP-seq sample the ratio of reads or
+read pairs that fall within reference bins) are
+calculated with respect to the whole set of reference
+bins.</p>
+<p class="last">ChIP-seq experiments often produce artifact signals
+in certain regions of the genome. In practice, we
+recommend filtering out a
+<a class="reference external" href="https://sites.google.com/site/anshulkundaje/projects/blacklists">black list of genomic regions</a> that tend to have
+anomalously excessive reads mapping prior to the
+downstream differential analysis. Such black lists
+for various genome assemblies of multiple species
+could be downloaded <a class="reference external" href="http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/">here</a>.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">--parameters=&lt;file&gt;</span></code></td>
+<td><p class="first" id="parameters">A configuration file specifying the parameters
+<em>in addition to</em> those provided on the command line.
+<code class="code docutils literal notranslate"><span class="pre">--parameters</span></code> itself can only be defined on the
+command line. Each line in &lt;file&gt; defines a
+parameter, with a format (for both short and long
+parameters) of “name=value” (with no spaces between
+them), or “name” alone. In either case, the leading
+hyphen(s) should <em>not</em> be included in the “name”.</p>
+<p>The following is an example configuration file:</p>
+<div class="last highlight-none notranslate"><div class="highlight"><pre><span></span>peaks=peak1.bed,peak2.bed
+reads=read1.bed,read2.bed
+n=example
+labs=s1,s2
+summits=summit1.bed,summit2.bed
+paired
+keep-dup=1
+filter=blackList.bed
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><code class="code docutils literal notranslate"><span class="pre">-v/--version</span></code></td>
+<td>Print the version of the program and exit.</td>
+</tr>
+<tr class="row-odd"><td><code class="code docutils literal notranslate"><span class="pre">-h/--help</span></code></td>
+<td>Print a help message and exit.</td>
+</tr>
+</tbody>
+</table>
+<div class="figure align-left" id="figure-3">
+<img alt="Alternative mode for dividing up merged peaks into consecutive genomic bins" src="_images/divide_peaks_alternative.png" />
+<div class="legend">
+<p><strong>Figure 3. Alternative mode for dividing up merged peaks into consecutive
+genomic bins.</strong> Boxes represent a merged peak and the associated genomic
+bins. Ticks within boxes mark the <em>inferred</em> summit (see <a class="reference internal" href="#figure-1">Figure 1</a>) of
+the merged peak as well as centers of bins.</p>
+<p>The only difference between this alternative mode and the default mode (see
+<a class="reference internal" href="#figure-2">Figure 2</a>) is in the manner of dealing with edge bins. In this mode, an
+edge bin is retained (and <em>not</em> trimmed) if its center is covered by the
+merged peak (see the left edge bin); an edge bin is discarded otherwise (see
+the right one). Notably, edge bins from adjacent merged peaks may
+overlap with each other in this mode.</p>
+</div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Better store all the parameter settings in a configuration file and assign
+it to <a class="reference internal" href="#parameters"><code class="code docutils literal notranslate"><span class="pre">--parameters</span></code></a> when invoking <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>, especially in the
+cases where a large number of samples are involved.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Syntax of the configuration file for calling <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code> is a bit
+different from that used in some other applications (e.g., in the
+<a class="reference external" href="https://setuptools.readthedocs.io/en/latest/setuptools.html#configuring-setup-using-setup-cfg-files"><code class="code docutils literal notranslate"><span class="pre">setup.cfg</span></code></a> for distributing and installing Python packages). Particularly,
+“pure” options (i.e., those without arguments) in our configuration file are
+specified by <code class="docutils literal notranslate"><span class="pre">name</span></code> alone <em>rather than</em> <code class="docutils literal notranslate"><span class="pre">name=1</span></code>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="transforming-sam-into-bed-files">
+<h2><a class="toc-backref" href="#id7">Transforming SAM into BED files</a><a class="headerlink" href="#transforming-sam-into-bed-files" title="Permalink to this headline">¶</a></h2>
+<p><code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code> converts <a class="reference external" href="https://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a> into <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a> files.
+It is designed to coordinate with <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>, since the
+latter only accepts BED-formatted input files. The simplest form of calling
+<code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code> is as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sam2bed -i File.sam -o File.bed
+</pre></div>
+</div>
+<p>The program will read from the standard input stream if <code class="code docutils literal notranslate"><span class="pre">-i</span></code> is not
+specified.</p>
+<p>For a complete list of parameters supported by <code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code>, type
+<code class="code docutils literal notranslate"><span class="pre">sam2bed</span> <span class="pre">--help</span></code> in the command line, and you’ll see the following:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Description: This program converts a standard SAM file to a BED file.
+
+Usage: sam2bed -i File.sam -o File.bed [options]
+
+Input/Output:
+-i &lt;file&gt;            Input SAM file. Default: standard input stream.
+-o &lt;file&gt;            Output BED file name. Mandatory.
+
+Options:
+--min-qual=&lt;int&gt;     Any mapping records with a mapping quality below
+                     &lt;int&gt; are ignored. Default: 0
+
+--retain-secondary   If set, secondary alignments are retained in the
+                     output. Default: OFF
+
+--retain-supplementary
+                     If set, supplementary alignments are retained in
+                     the output. Default: OFF
+
+--suppress-extension
+                     If set, the alignment match section in reference
+                     sequence is output for each alignment record. By
+                     default, the section is extended to reach the two
+                     end points of the read, which is suited to the
+                     following identification of duplicate reads, if
+                     needed.
+
+-v/--version         Print the version information and exit.
+
+-h/--help            Print this help message and exit.
+
+Note: The query template name and mapping quality are taken as the
+name and score field in the output BED file, respectively.
+</pre></div>
+</div>
+<p>We expect all the parameters shown above but <code class="code docutils literal notranslate"><span class="pre">--suppress-extension</span></code> to be
+easy to understand. See <a class="reference internal" href="#figure-4">Figure 4</a> for a detailed explanation of
+<code class="code docutils literal notranslate"><span class="pre">--suppress-extension</span></code>.</p>
+<div class="figure align-left" id="figure-4">
+<img alt="Extend the alignment match sections in reference sequence to reach the end points of reads" src="_images/extend_alignment_section.png" />
+<div class="legend">
+<p><strong>Figure 4. Extend the alignment match sections in reference sequence to
+reach the end points of reads.</strong> Consistent with the
+<em>0-based coordinate system</em>, which is the coordinate system used by <a class="reference external" href="http://genome.ucsc.edu/FAQ/FAQformat.html#format1">BED</a>
+files, here the reference sequence starts with a coordinate of 0, and the
+intervals mentioned below are all left closed and right open. Note that <a class="reference external" href="https://samtools.github.io/hts-specs/SAMv1.pdf">SAM</a>
+files utilize a different coordinate system.</p>
+<p>Two reads are shown in the diagram, and their 5’ ends are both associated
+with <em>soft clippings</em> due to a low sequencing quality (see the
+<a class="reference external" href="https://samtools.github.io/hts-specs/SAMv1.pdf">SAM Format Specification</a> for more information about CIGAR string).
+The alignment matches for these two reads start from 8 and 10, respectively,
+which correspond to the POS fields of their SAM alignment records.
+If <code class="code docutils literal notranslate"><span class="pre">--suppress-extension</span></code> is set, the interval <em>exactly</em> wrapping the
+alignment matches of each read is written to the output BED file, which is
+<code class="docutils literal notranslate"><span class="pre">[8,</span> <span class="pre">16)</span></code> and <code class="docutils literal notranslate"><span class="pre">[10,</span> <span class="pre">16)</span></code> for read 1 and 2, respectively. Thus, the two
+reads will not be treated as duplicates by <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>, since their
+5’ end positions are not the same (see also the <a class="reference internal" href="#keep-dup"><code class="code docutils literal notranslate"><span class="pre">--keep-dup</span></code></a> parameter of
+<code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>). In the default mode, the alignment intervals are
+extended to reach the end points of reads, and <code class="docutils literal notranslate"><span class="pre">[7,</span> <span class="pre">16)</span></code> will be output
+for both of the two reads. In this case, if <code class="code docutils literal notranslate"><span class="pre">--keep-dup</span></code> is set to 1 when
+calling <code class="code docutils literal notranslate"><span class="pre">profile_bins</span></code>, only one of the two reads will be retained for
+the counting procedure (see also the section of
+<a class="reference internal" href="#counting-reads-falling-within-reference-genomic-bins">Counting reads falling within reference genomic bins</a>).</p>
+</div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">In the vast majority of cases, the default setting of most of the parameters
+supported by <code class="code docutils literal notranslate"><span class="pre">sam2bed</span></code> should be used.
+The only parameter that may be customized in
+practice is the <code class="code docutils literal notranslate"><span class="pre">--min-qual</span></code>, which controls the program’s behavior
+regarding filtering out the alignment records with a low mapping quality.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Specification of MAnorm2_utils</a><ul>
+<li><a class="reference internal" href="#profiling-chip-seq-signals-in-reference-genomic-regions">Profiling ChIP-seq signals in reference genomic regions</a><ul>
+<li><a class="reference internal" href="#mandatory-inputs">Mandatory inputs</a></li>
+<li><a class="reference internal" href="#decorating-outputs">Decorating outputs</a></li>
+<li><a class="reference internal" href="#deducing-reference-genomic-bins">Deducing reference genomic bins</a></li>
+<li><a class="reference internal" href="#counting-reads-falling-within-reference-genomic-bins">Counting reads falling within reference genomic bins</a></li>
+<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transforming-sam-into-bed-files">Transforming SAM into BED files</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/MAnorm2_utils-manual.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">MAnorm2_utils 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Shiqi Tu.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
+    </div>
+  </body>
+</html>

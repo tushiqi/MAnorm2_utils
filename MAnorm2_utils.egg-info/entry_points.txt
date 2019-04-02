@@ -1,0 +1,4 @@
+[console_scripts]
+profile_bins = MAnorm2_utils.scripts.profile_bins:main
+sam2bed = MAnorm2_utils.scripts.sam2bed:main
+
