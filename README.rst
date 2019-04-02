@@ -1,10 +1,11 @@
-==============================
-MAnorm2_utils 1.0.0
-==============================
+=============================
+Introduction to MAnorm2_utils
+=============================
 
 :Author: Shiqi Tu
 :Contact: tushiqi@picb.ac.cn
-:Date: 2018-07-08
+:Version: 1.0.0
+:Date: 2018-08-24
 
 :code:`MAnorm2_utils` is designed to coordinate with MAnorm2_, an R package for
 differential analysis with ChIP-seq_ signals between two or more groups of
@@ -67,8 +68,8 @@ The following is a sample usage of :code:`profile_bins` of the simplest form:
 .. _BED-formatted: BED_
 .. _BED: http://genome.ucsc.edu/FAQ/FAQformat.html#format1
 .. _BAM-formatted: SAM_
-.. _SAM: http://samtools.github.io/hts-specs/SAMv1.pdf
-.. _Samtools: http://www.htslib.org/
+.. _SAM: https://samtools.github.io/hts-specs/SAMv1.pdf
+.. _Samtools: https://www.htslib.org/
 __ `Transforming SAM into BED files`_
 
 If everything goes smoothly, the command above will generate two files, named
@@ -105,7 +106,7 @@ Among others, several parameters deserve specific attention:
   merged peak into consecutive genomic bins. Specify :code:`--typical-bin-size`
   to control the size of such genomic bins. Note that the merged peaks having a
   size comparable to this parameter are left untouched.
-  
+
   The default value of :code:`--typical-bin-size`, which is 2000, suits well
   the ChIP-seq samples of histone modifications. For ChIP-seq samples of
   transcription factors, setting the parameter to 1000 is recommended.
@@ -120,7 +121,7 @@ Among others, several parameters deserve specific attention:
   reference bins to profile, by setting :code:`--bins` to a BED_ file. In this
   case, :code:`profile_bins` focuses on these provided bins and suppresses the
   peak merging procedure.
-  
+
   :code:`--typical-bin-size` and :code:`--summits` are ignored when
   :code:`--bins` is specified.
 
@@ -137,7 +138,7 @@ Among others, several parameters deserve specific attention:
   could be accurately inferred. Note that two reads from the same ChIP-seq
   sample are considered as a read pair only if they have *exactly the same*
   name (i.e., the 4th column in a BED_ file).
-  
+
   :code:`--shiftsize` is ignored when :code:`--paired` is set.
 
 - :code:`--keep-dup` controls the program's behavior regarding duplicate reads
@@ -146,7 +147,7 @@ Among others, several parameters deserve specific attention:
   the same genomic locus; for paired-end reads, two read pairs are considered
   as duplicates if their implied DNA fragments occupy the same genomic
   interval.
-  
+
   By default, :code:`profile_bins` preserves all the reads (or read pairs) for
   the counting procedure. For both paired-end reads and deep-sequencing
   single-end reads, we strongly recommend setting :code:`--keep-dup` to 1 to
@@ -160,14 +161,15 @@ Among others, several parameters deserve specific attention:
   deliver parameters, to avoid repeated typing in the command line. To do that,
   write a configuration file following the format as demonstrated below, and
   pass it to :code:`--parameters`::
-  
+
     peaks=peak1.bed,peak2.bed
     reads=read1.bed,read2.bed
     labs=s1,s2
     n=example
+    summits=summit1.bed,summit2.bed
     paired
     keep-dup=1
-  
+
   Note that :code:`--parameters` could be used in mixture with the other
   command-line arguments.
 
